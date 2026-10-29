@@ -175,15 +175,15 @@ section[id] { scroll-margin-top: var(--nav); }
 .tela-espera { position: absolute; inset: 0; display: grid; place-items: center; font: 400 1.6rem/1 var(--titulo); color: var(--nevoa); letter-spacing: .04em; }
 .tela iframe {
   position: absolute; top: 0; left: 0; border: 0; width: 390px; height: calc(100% / var(--k, 1));
-  transform: scale(var(--k, 1)); transform-origin: 0 0; pointer-events: none;
+  transform: scale(var(--k, 1)); transform-origin: 0 0;
   opacity: 0; transition: opacity .6s;
 }
 .tela iframe.pronto { opacity: 1; }
 .projeto-info small { display: block; font: 500 .6875rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--gelo); margin-bottom: 8px; }
 .projeto-info h3 { font: 400 1.9rem/1 var(--titulo); letter-spacing: .02em; margin: 0 0 6px; }
 .projeto-info p { margin: 0 0 12px; color: var(--nevoa); font-size: .9375rem; line-height: 1.5; }
-.projeto-abrir { font: 600 .8125rem/1 var(--texto); letter-spacing: .06em; text-transform: uppercase; color: var(--neve); border-bottom: 1px solid var(--fio-forte); padding-bottom: 3px; transition: border-color .2s; }
-.projeto:hover .projeto-abrir { border-bottom-color: var(--gelo); }
+.projeto-abrir { display: inline-block; font: 600 .8125rem/1 var(--texto); letter-spacing: .06em; text-transform: uppercase; color: var(--neve); border-bottom: 1px solid var(--fio-forte); padding-bottom: 3px; transition: border-color .2s; }
+.projeto-abrir:hover, .projeto-abrir:focus-visible { border-bottom-color: var(--gelo); }
 .vitrine-aviso { margin: 36px 0 0; font: 400 .75rem/1.5 var(--mono); color: var(--nevoa); letter-spacing: .04em; }
 @media (max-width: 980px) {
   .vitrine {
@@ -371,46 +371,46 @@ section[id] { scroll-margin-top: var(--nav); }
           <p class="rotulo rv">01 · Projetos</p>
           <h2 class="titulo rv" style="--d:.08s">Feitos aqui.<br><em>Abre e mexe.</em></h2>
         </div>
-        <p class="apoio rv" style="--d:.16s">Os celulares abaixo mostram os sites rodando de verdade, não imagem. Cada um tem uma função que ajuda o negócio a vender.</p>
+        <p class="apoio rv" style="--d:.16s">Os celulares abaixo mostram os sites rodando de verdade, não imagem. Role a tela dentro de cada um e clique à vontade.</p>
       </div>
 
       <div class="vitrine">
-        <a class="projeto rv" href="https://dzkedu.github.io/lia-doces/" target="_blank" rel="noopener">
-          <div class="cel"><div class="tela"><span class="tela-espera">Lia Doces</span><iframe data-src="https://dzkedu.github.io/lia-doces/" title="Prévia do site Lia Doces" tabindex="-1" aria-hidden="true"></iframe></div></div>
+        <div class="projeto rv">
+          <div class="cel"><div class="tela"><span class="tela-espera">Lia Doces</span><iframe data-src="https://dzkedu.github.io/lia-doces/" title="Prévia do site Lia Doces"></iframe></div></div>
           <div class="projeto-info">
             <small>01 · Confeitaria</small>
             <h3>Lia Doces</h3>
             <p>Catálogo com carrinho: a cliente monta o pedido e ele chega pronto no WhatsApp.</p>
-            <span class="projeto-abrir">Abrir projeto ↗</span>
+            <a class="projeto-abrir" href="https://dzkedu.github.io/lia-doces/" target="_blank" rel="noopener">Abrir em tela cheia ↗</a>
           </div>
-        </a>
-        <a class="projeto rv" style="--d:.08s" href="https://dzkedu.github.io/nexo-motors/" target="_blank" rel="noopener">
-          <div class="cel"><div class="tela"><span class="tela-espera">Nexo Motors</span><iframe data-src="https://dzkedu.github.io/nexo-motors/" title="Prévia do site Nexo Motors" tabindex="-1" aria-hidden="true"></iframe></div></div>
+        </div>
+        <div class="projeto rv" style="--d:.08s">
+          <div class="cel"><div class="tela"><span class="tela-espera">Nexo Motors</span><iframe data-src="https://dzkedu.github.io/nexo-motors/" title="Prévia do site Nexo Motors"></iframe></div></div>
           <div class="projeto-info">
             <small>02 · Revenda de veículos</small>
             <h3>Nexo Motors</h3>
             <p>Estoque com filtro e um caminho próprio pra quem quer vender ou consignar o carro.</p>
-            <span class="projeto-abrir">Abrir projeto ↗</span>
+            <a class="projeto-abrir" href="https://dzkedu.github.io/nexo-motors/" target="_blank" rel="noopener">Abrir em tela cheia ↗</a>
           </div>
-        </a>
-        <a class="projeto rv" style="--d:.16s" href="https://dzkedu.github.io/festas/" target="_blank" rel="noopener">
-          <div class="cel"><div class="tela"><span class="tela-espera">Brilho Festas</span><iframe data-src="https://dzkedu.github.io/festas/" title="Prévia do site Brilho Festas" tabindex="-1" aria-hidden="true"></iframe></div></div>
+        </div>
+        <div class="projeto rv" style="--d:.16s">
+          <div class="cel"><div class="tela"><span class="tela-espera">Brilho Festas</span><iframe data-src="https://dzkedu.github.io/festas/" title="Prévia do site Brilho Festas"></iframe></div></div>
           <div class="projeto-info">
             <small>03 · Eventos</small>
             <h3>Brilho Festas</h3>
             <p>Pacotes lado a lado, passo a passo da festa e orçamento direto pelo WhatsApp.</p>
-            <span class="projeto-abrir">Abrir projeto ↗</span>
+            <a class="projeto-abrir" href="https://dzkedu.github.io/festas/" target="_blank" rel="noopener">Abrir em tela cheia ↗</a>
           </div>
-        </a>
-        <a class="projeto rv" style="--d:.24s" href="https://dzkedu.github.io/lince-otica/" target="_blank" rel="noopener">
-          <div class="cel"><div class="tela"><span class="tela-espera">Lince Ótica</span><iframe data-src="https://dzkedu.github.io/lince-otica/" title="Prévia do site Lince Ótica" tabindex="-1" aria-hidden="true"></iframe></div></div>
+        </div>
+        <div class="projeto rv" style="--d:.24s">
+          <div class="cel"><div class="tela"><span class="tela-espera">Lince Ótica</span><iframe data-src="https://dzkedu.github.io/lince-otica/" title="Prévia do site Lince Ótica"></iframe></div></div>
           <div class="projeto-info">
             <small>04 · Ótica</small>
             <h3>Lince Ótica</h3>
             <p>Vitrine 3D dos modelos e a promessa da loja na cara: trouxe orçamento, a gente cobre.</p>
-            <span class="projeto-abrir">Abrir projeto ↗</span>
+            <a class="projeto-abrir" href="https://dzkedu.github.io/lince-otica/" target="_blank" rel="noopener">Abrir em tela cheia ↗</a>
           </div>
-        </a>
+        </div>
       </div>
       <p class="vitrine-aviso">Projetos conceito. Lia Doces, Nexo Motors, Brilho Festas e Lince Ótica são marcas fictícias.</p>
     </div>
