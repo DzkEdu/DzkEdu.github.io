@@ -21,11 +21,9 @@
     var calmo = q === '1' ? false : q === '0' ? true :
       salvo ? salvo === 'nao' : matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (calmo) document.documentElement.classList.add('calmo');
-    /* abertura: só na primeira visita e nunca com movimento reduzido; ?intro=1 força, ?intro=0 pula */
+    /* abertura: toca toda vez que a página carrega, menos com movimento reduzido; ?intro=1 força, ?intro=0 pula */
     var qi = new URLSearchParams(location.search).get('intro');
-    var vista = null;
-    try { vista = localStorage.getItem('dzk.intro'); } catch (e) {}
-    if (!calmo && (qi === '1' || (qi !== '0' && !vista && !location.hash))) document.documentElement.classList.add('intro');
+    if (qi === '1' || (!calmo && qi !== '0')) document.documentElement.classList.add('intro');
   })();
 </script>
 <style>
@@ -1015,7 +1013,6 @@ section[id] { scroll-margin-top: var(--nav); }
      ========================================================= */
   (function () {
     if (!raiz.classList.contains('intro')) return;
-    try { localStorage.setItem('dzk.intro', 'vista'); } catch (e) {}
 
     var cv = document.createElement('canvas');
     cv.id = 'abertura';
