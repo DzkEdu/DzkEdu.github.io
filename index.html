@@ -21,6 +21,11 @@
     var calmo = q === '1' ? false : q === '0' ? true :
       salvo ? salvo === 'nao' : matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (calmo) document.documentElement.classList.add('calmo');
+    /* abertura: só na primeira visita e nunca com movimento reduzido; ?intro=1 força, ?intro=0 pula */
+    var qi = new URLSearchParams(location.search).get('intro');
+    var vista = null;
+    try { vista = localStorage.getItem('dzk.intro'); } catch (e) {}
+    if (!calmo && (qi === '1' || (qi !== '0' && !vista && !location.hash))) document.documentElement.classList.add('intro');
   })();
 </script>
 <style>
@@ -249,26 +254,6 @@ section[id] { scroll-margin-top: var(--nav); }
 .extras strong { color: var(--neve); font-weight: 600; }
 @media (max-width: 920px) { .planos { grid-template-columns: 1fr; max-width: 520px; } }
 
-/* ---------- teste da runa ---------- */
-.teste { background: radial-gradient(50% 60% at 78% 50%, rgba(127, 209, 232, .08), transparent 70%), var(--breu); border-block: 1px solid var(--fio); }
-.teste-grade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 90px); align-items: center; }
-.campo { display: flex; gap: 0; margin: 32px 0 16px; max-width: 480px; }
-.campo input {
-  flex: 1; min-width: 0; min-height: 56px; padding: 0 18px; background: var(--pedra); border: 1px solid var(--fio-forte); border-right: 0;
-  font-size: 1.0625rem; color: var(--neve); outline: none; border-radius: 0;
-}
-.campo input:focus { border-color: var(--gelo); }
-.campo input::placeholder { color: #69727b; }
-.campo .btn { min-height: 56px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--corte)), calc(100% - var(--corte)) 100%, 0 100%); }
-.runa-resultado { min-height: 1.6em; margin: 0 0 20px; color: var(--nevoa); }
-.runa-resultado strong { color: var(--neve); }
-#cta-runa { display: none; }
-#cta-runa.on { display: inline-flex; }
-.runa-caixa { position: relative; aspect-ratio: 1; max-width: 460px; width: 100%; justify-self: center; }
-#runa-negocio { width: 100%; height: 100%; }
-.runa-nome { position: absolute; left: 0; right: 0; bottom: 2%; text-align: center; font: 400 clamp(1.3rem, 2.6vw, 1.9rem)/1 var(--titulo); letter-spacing: .14em; color: var(--gelo); text-transform: uppercase; }
-@media (max-width: 860px) { .teste-grade { grid-template-columns: 1fr; } .runa-caixa { max-width: 340px; order: -1; } }
-
 /* ---------- dúvidas ---------- */
 .duvidas { max-width: 820px; margin: 44px 0 0; border-top: 1px solid var(--fio); }
 .duvidas details { border-bottom: 1px solid var(--fio); }
@@ -312,13 +297,36 @@ section[id] { scroll-margin-top: var(--nav); }
 .zap svg { width: 26px; height: 26px; }
 .zap.fora { transform: translateY(24px) scale(.8); opacity: 0; pointer-events: none; }
 
+/* ---------- abertura: a runa gira, acende e se divide ---------- */
+/* a capa preta segura a tela até o canvas assumir; se o JS falhar, some sozinha */
+.intro body::before { content: ""; position: fixed; inset: 0; z-index: 90; background: var(--breu); animation: sem-capa 0s 4s forwards; }
+@keyframes sem-capa { to { visibility: hidden; } }
+.nav { transition: background .3s, border-color .3s, opacity .8s var(--saida); }
+.topo-texto { transition: opacity .9s var(--saida) .15s, transform .9s var(--saida) .15s; }
+.intro .nav, .intro .topo-texto { opacity: 0; }
+.intro .topo-texto { transform: translateY(18px); }
+.intro-solta body::before { display: none; }
+.intro-solta .nav, .intro-solta .topo-texto { opacity: 1; transform: none; }
+.intro .nav .marca img, .intro .nav .marca-nome { opacity: 0; }
+.marca-nome { transition: opacity .5s var(--saida), transform .5s var(--saida); }
+.intro .nav .marca-nome { transform: translateX(-10px); }
+#abertura { position: fixed; inset: 0; z-index: 100; width: 100%; height: 100%; cursor: pointer; }
+.pular {
+  position: fixed; right: 20px; bottom: 20px; z-index: 101; padding: 10px 16px; cursor: pointer;
+  font: 500 .6875rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--nevoa); background: transparent; border: 1px solid var(--fio);
+  animation: aparece .4s .5s both;
+}
+.pular:hover { color: var(--gelo); border-color: var(--fio-forte); }
+@keyframes aparece { from { opacity: 0; } }
+
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 </head>
 <body>
 
 <header class="nav" id="nav">
-  <a class="marca" href="#topo" aria-label="Dzk, voltar ao topo"><img src="logo-icone.svg" alt="" width="34" height="34">DZK</a>
+  <a class="marca" href="#topo" aria-label="Dzk, voltar ao topo"><img src="logo-icone.svg" alt="" width="34" height="34"><span class="marca-nome">DZK</span></a>
   <ul class="nav-links">
     <li><a href="#projetos">Projetos</a></li>
     <li><a href="#servicos">Serviços</a></li>
@@ -512,30 +520,9 @@ section[id] { scroll-margin-top: var(--nav); }
     </div>
   </section>
 
-  <section class="secao teste" id="teste">
-    <div class="miolo teste-grade">
-      <div>
-        <p class="rotulo rv">05 · Faz o teste</p>
-        <h2 class="titulo rv" style="--d:.08s">Qual o nome do <em>seu negócio?</em></h2>
-        <p class="apoio rv" style="--d:.16s">Cada nome gera uma runa única. A mesma palavra sempre dá o mesmo desenho, nenhum outro nome sai igual. É assim que eu penso o seu site: feito só pra você.</p>
-        <form class="campo rv" id="form-runa" style="--d:.2s" autocomplete="off">
-          <label for="nome-runa" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nome do seu negócio</label>
-          <input id="nome-runa" type="text" maxlength="40" placeholder="Ex.: Padaria do Zé" required>
-          <button class="btn" type="submit">Gerar</button>
-        </form>
-        <p class="runa-resultado" id="runa-texto" aria-live="polite"></p>
-        <a class="btn" id="cta-runa" href="#" target="_blank" rel="noopener" data-cta>Quero o site</a>
-      </div>
-      <div class="runa-caixa">
-        <canvas id="runa-negocio" aria-hidden="true"></canvas>
-        <span class="runa-nome" id="runa-nome"></span>
-      </div>
-    </div>
-  </section>
-
   <section class="secao" id="duvidas">
     <div class="miolo">
-      <p class="rotulo rv">06 · Dúvidas</p>
+      <p class="rotulo rv">05 · Dúvidas</p>
       <h2 class="titulo rv" style="--d:.08s">Ficou <em>alguma dúvida?</em></h2>
       <div class="duvidas rv" style="--d:.16s">
         <details>
@@ -564,7 +551,7 @@ section[id] { scroll-margin-top: var(--nav); }
 
   <section class="secao final" id="contato">
     <div class="miolo">
-      <p class="rotulo rv">07 · Contato</p>
+      <p class="rotulo rv">06 · Contato</p>
       <h2 class="titulo rv" style="--d:.08s">Bora chamar mais clientes <em>pro seu negócio?</em></h2>
       <p class="apoio rv" style="--d:.16s">Me conta o que você precisa. A mensagem já vai pronta pro meu WhatsApp.</p>
       <form class="pedido rv" id="pedido" style="--d:.2s" autocomplete="on">
@@ -705,7 +692,7 @@ section[id] { scroll-margin-top: var(--nav); }
   andarPassos();
 
   /* =========================================================
-     desenho: utilidades compartilhadas pelas duas runas
+     desenho: utilidades da runa do topo e da abertura
      ========================================================= */
   var HEX = [[60, 14], [100, 37], [100, 83], [60, 106], [20, 83], [20, 37]];
   var SOWILO = [[72, 32], [46, 59], [72, 66], [46, 92]];
@@ -735,6 +722,16 @@ section[id] { scroll-margin-top: var(--nav); }
   }
 
   /* traça só uma parte da linha (0 a 1) e devolve onde a ponta está */
+  /* contorno da pedra: enquanto desenha é uma linha, pronto vira caminho fechado pra ponta de cima não ficar aberta */
+  function contornar(ctx, pts, prog) {
+    if (prog < 1) return tracar(ctx, pts, prog);
+    ctx.beginPath();
+    /* o último ponto repete o primeiro: fica de fora pra a quina fechar limpa */
+    pts.slice(0, -1).forEach(function (p, i) { i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+    ctx.closePath();
+    ctx.stroke();
+  }
+
   function tracar(ctx, pts, prog) {
     var total = comprimento(pts) * prog, feito = 0, ponta = pts[0];
     ctx.beginPath();
@@ -834,11 +831,9 @@ section[id] { scroll-margin-top: var(--nav); }
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-  function semente(txt) {
-    var h = 2166136261;
-    for (var i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
+
+  /* o topo espera a abertura e ela avisa quando a luz chega na pedra */
+  var palcoTopo = {};
 
   /* =========================================================
      topo: o raio cai e entalha a runa na pedra
@@ -851,6 +846,7 @@ section[id] { scroll-margin-top: var(--nav); }
     var W, H, dpr, cx, cy, S, pedra, runaPts, hexPts;
     var raios = [], faiscas = [], rastro = [];
     var t0 = 0, flash = 0, visivel = true, rodando = false, proxArco = 0, ultimoToque = 0;
+    var esperando = raiz.classList.contains('intro');
 
     function noPalco(p) { return [cx + (p[0] - 60) * S / 120, cy + (p[1] - 60) * S / 120]; }
 
@@ -893,7 +889,7 @@ section[id] { scroll-margin-top: var(--nav); }
       if (c > 0) {
         ctx.strokeStyle = 'rgba(127,209,232,' + (.35 + pulso * .4) + ')';
         ctx.lineWidth = S * .033;
-        tracar(ctx, hexPts, c);
+        contornar(ctx, hexPts, c);
       }
       if (e > 0) {
         /* o sulco escuro primeiro, a luz por dentro depois */
@@ -912,7 +908,8 @@ section[id] { scroll-margin-top: var(--nav); }
 
     function quadro(agora) {
       if (!t0) t0 = agora;
-      var t = agora - t0;
+      /* enquanto a abertura toca, a pedra fica lisa esperando a luz */
+      var t = esperando ? 0 : agora - t0;
       ctx.clearRect(0, 0, W, H);
       ctx.drawImage(pedra, cx - S / 2, cy - S / 2, S, S);
 
@@ -960,6 +957,15 @@ section[id] { scroll-margin-top: var(--nav); }
     function parar() { rodando = false; }
     function estatico() { parar(); raios.length = faiscas.length = rastro.length = 0; flash = 0; quadro(performance.now()); }
 
+    /* a luz da abertura chegou: a runa já está entalhada e o raio cai em cima */
+    palcoTopo.chegou = function () {
+      if (!esperando) return;
+      esperando = false;
+      t0 = performance.now() - ENTALHE[1];
+      quadro.golpeado = true;
+      golpe(runaPts[0][0], runaPts[0][1], true);
+    };
+
     medir();
     if (calmo()) estatico(); else ligar();
 
@@ -1004,92 +1010,245 @@ section[id] { scroll-margin-top: var(--nav); }
   })();
 
   /* =========================================================
-     teste: a runa de cada nome
+     abertura: a runa entra gigante girando, acende e se divide.
+     uma cópia pequena pousa no menu, a luz cai na pedra do topo
      ========================================================= */
   (function () {
-    var cv = document.getElementById('runa-negocio');
+    if (!raiz.classList.contains('intro')) return;
+    try { localStorage.setItem('dzk.intro', 'vista'); } catch (e) {}
+
+    var cv = document.createElement('canvas');
+    cv.id = 'abertura';
+    cv.setAttribute('aria-hidden', 'true');
+    var pular = document.createElement('button');
+    pular.type = 'button';
+    pular.className = 'pular';
+    pular.textContent = 'Pular';
+    document.body.appendChild(cv);
+    document.body.appendChild(pular);
+
     var ctx = cv.getContext('2d');
-    var nomeEl = document.getElementById('runa-nome');
-    var texto = document.getElementById('runa-texto');
-    var cta = document.getElementById('cta-runa');
-    var W, segs = [], faiscas = [], inicio = 0, pedra, rodando = false;
+    var marca = document.querySelector('.nav .marca img');
+    var palco = document.getElementById('palco');
+    var W, H, S0, pedra, t0 = 0, fim = false, solta = false, estalou = false, flash = 0;
+    var raios = [], faiscas = [];
+
+    /* linha do tempo, em ms */
+    var GIRO = [0, 1300], ACENDE = [1300, 1650], ESTALO = 1650, DIVIDE = [1850, 2700];
+    var VOLTAS = 2.25;
+
+    function prog(t, faixa) { return Math.min(1, Math.max(0, (t - faixa[0]) / (faixa[1] - faixa[0]))); }
+    function saida(p) { return 1 - Math.pow(1 - p, 3); }
+    function suave(p) { return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+    function entre(a, b, k) { return a + (b - a) * k; }
+    function local(p, s) { return [(p[0] - 60) * s / 120, (p[1] - 60) * s / 120]; }
+    function hexCaminho(s) {
+      ctx.beginPath();
+      HEX.forEach(function (p, i) { var q = local(p, s); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+      ctx.closePath();
+    }
 
     function medir() {
       var dpr = Math.min(devicePixelRatio || 1, 2);
-      W = cv.clientWidth;
-      cv.width = cv.height = Math.round(W * dpr);
+      W = innerWidth; H = innerHeight;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      pedra = fazerPedra(W * .9, 23);
+      S0 = Math.min(W, H) * .6;
+      /* a pedra nasce grande pra continuar nítida no zoom */
+      pedra = fazerPedra(Math.min(S0 * 2.3, 2400 / dpr), 11);
     }
 
-    /* tronco no meio e galhos sorteados pelo nome: a mesma palavra sempre dá a mesma runa */
-    function gerar(nome) {
-      var chave = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
-      var rnd = sorteio(semente(chave));
-      var c = W / 2, A = W * .23, lista = [[[c, c - A], [c, c + A]]];
-      var vagas = [-.75, -.45, -.15, .15, .45, .75];
-      var n = 3 + Math.floor(rnd() * 3);
-      for (var i = 0; i < n; i++) {
-        var y = c + vagas.splice(Math.floor(rnd() * vagas.length), 1)[0] * A;
-        var lado = rnd() > .5 ? 1 : -1, a = A * (.32 + rnd() * .22), b = A * (.22 + rnd() * .2) * (rnd() > .5 ? 1 : -1);
-        var tipo = Math.floor(rnd() * 4);
-        if (tipo === 0) lista.push([[c, y], [c + lado * a, y + b]]);
-        else if (tipo === 1) lista.push([[c, y], [c + lado * a, y + b], [c, y + 2 * b]]);
-        else if (tipo === 2) lista.push([[c - a, y - b], [c + a, y + b]]);
-        else { lista.push([[c, y], [c + a, y - Math.abs(b)]]); lista.push([[c, y], [c - a, y - Math.abs(b)]]); }
+    /* a pedra girando no próprio eixo: de lado mostra a espessura, de costas não tem runa */
+    function pedraGirando(x, y, s, ang, luz, borda) {
+      var k = Math.cos(ang), lado = Math.sin(ang) * s * .08;
+      var kk = Math.abs(k) < .02 ? (k < 0 ? -.02 : .02) : k;
+      ctx.save();
+      ctx.translate(x, y);
+      for (var i = 6; i >= 1; i--) {
+        ctx.save();
+        ctx.translate(lado * i / 6, 0);
+        ctx.scale(kk, 1);
+        hexCaminho(s);
+        ctx.fillStyle = i === 6 ? '#060708' : '#0B0C0F';
+        ctx.fill();
+        ctx.restore();
       }
-      return lista;
+      ctx.scale(kk, 1);
+      ctx.drawImage(pedra, -s / 2, -s / 2, s, s);
+      hexCaminho(s);
+      ctx.fillStyle = 'rgba(0,0,0,' + ((1 - Math.abs(k)) * .6) + ')';
+      ctx.fill();
+      /* luz fria na quina pra pedra apagada não sumir no fundo */
+      ctx.strokeStyle = 'rgba(127,209,232,' + (.1 + Math.abs(k) * .12) + ')';
+      ctx.lineWidth = Math.max(1.5, s * .008);
+      ctx.stroke();
+
+      var ponta = null;
+      if (k > 0) {
+        var pts = SOWILO.map(function (p) { return local(p, s); });
+        ctx.lineJoin = 'miter'; ctx.lineCap = 'butt';
+        ctx.strokeStyle = '#040506'; ctx.lineWidth = s * .085;
+        tracar(ctx, pts, 1);
+        if (luz > 0) {
+          ctx.strokeStyle = 'rgba(127,209,232,.2)'; ctx.lineWidth = s * .14;
+          tracar(ctx, pts, luz);
+          ctx.strokeStyle = '#7FD1E8'; ctx.lineWidth = s * .052;
+          var p = tracar(ctx, pts, luz);
+          ctx.strokeStyle = '#E6F8FD'; ctx.lineWidth = s * .016;
+          tracar(ctx, pts, luz);
+          ponta = [x + p[0] * kk, y + p[1]];
+        }
+        if (borda > 0) {
+          var hp = HEX.map(function (q) { return local(q, s); });
+          hp.push(hp[0]);
+          ctx.strokeStyle = 'rgba(127,209,232,.75)'; ctx.lineWidth = s * .033;
+          contornar(ctx, hp, borda);
+        }
+      }
+      ctx.restore();
+      return ponta;
+    }
+
+    /* só a luz da runa, do mesmo jeito que o topo desenha */
+    function luzRuna(x, y, s) {
+      var pts = SOWILO.map(function (p) { var q = local(p, s); return [x + q[0], y + q[1]]; });
+      ctx.save();
+      ctx.lineJoin = 'miter'; ctx.lineCap = 'butt';
+      ctx.strokeStyle = 'rgba(127,209,232,.22)'; ctx.lineWidth = s * .14;
+      tracar(ctx, pts, 1);
+      ctx.strokeStyle = '#7FD1E8'; ctx.lineWidth = s * .052;
+      tracar(ctx, pts, 1);
+      ctx.strokeStyle = '#E6F8FD'; ctx.lineWidth = s * .016;
+      tracar(ctx, pts, 1);
+      ctx.restore();
+    }
+
+    /* a cópia pequena: termina igual ao ícone do menu */
+    function icone(x, y, s, vira, brilho) {
+      var u = s / 120;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(Math.abs(vira) < .02 ? .02 : vira, 1);
+      ctx.lineJoin = 'miter'; ctx.lineCap = 'butt';
+      hexCaminho(s);
+      if (brilho > 0) {
+        ctx.strokeStyle = 'rgba(127,209,232,' + (.25 * brilho) + ')'; ctx.lineWidth = 14 * u;
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#7FD1E8'; ctx.lineWidth = 4 * u;
+      ctx.stroke();
+      ctx.lineWidth = 7 * u;
+      ctx.beginPath();
+      SOWILO.map(function (p) { return local(p, s); }).forEach(function (q, i) { i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+      ctx.stroke();
+      ctx.restore();
     }
 
     function quadro(agora) {
-      var t = (agora - inicio) / 1000;
-      ctx.clearRect(0, 0, W, W);
-      ctx.drawImage(pedra, W * .05, W * .05, W * .9, W * .9);
-      ctx.save();
-      ctx.lineCap = 'square'; ctx.lineJoin = 'miter';
-      var cada = .32, ativo = false;
-      segs.forEach(function (s, i) {
-        var p = calmo() ? 1 : Math.min(1, Math.max(0, (t - i * cada) / cada));
-        if (p <= 0) return;
-        ctx.strokeStyle = '#040506'; ctx.lineWidth = W * .05; tracar(ctx, s, p);
-        ctx.strokeStyle = '#7FD1E8'; ctx.lineWidth = W * .028; var ponta = tracar(ctx, s, p);
-        ctx.strokeStyle = '#E6F8FD'; ctx.lineWidth = W * .008; tracar(ctx, s, p);
-        if (p < 1) { ativo = true; for (var k = 0; k < 2; k++) novaFaisca(faiscas, ponta[0], ponta[1], 2); }
-      });
-      ctx.restore();
+      if (fim) return;
+      if (!t0) t0 = agora;
+      var t = agora - t0;
+      var cx = W / 2, cy = H / 2;
+      var d = prog(t, DIVIDE);
+      ctx.clearRect(0, 0, W, H);
+
+      /* o fundo preto vai embora enquanto a runa se divide */
+      ctx.fillStyle = 'rgba(13,13,15,' + (1 - saida(d)) + ')';
+      ctx.fillRect(0, 0, W, H);
+
+      if (t < DIVIDE[0]) {
+        var g = saida(prog(t, GIRO));
+        var luz = saida(prog(t, ACENDE));
+        var s = S0 * (2.3 - 1.3 * g);
+        var tremor = flash > 0 ? flash * 7 : 0;
+        var tx = (Math.random() - .5) * tremor, ty = (Math.random() - .5) * tremor;
+
+        /* brilho atrás da pedra, cresce quando ela acende */
+        var halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, s);
+        halo.addColorStop(0, 'rgba(127,209,232,' + (.05 + luz * .14) + ')');
+        halo.addColorStop(1, 'rgba(127,209,232,0)');
+        ctx.fillStyle = halo;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.globalAlpha = Math.min(1, t / 260);
+        var ponta = pedraGirando(cx + tx, cy + ty, s, (1 - g) * VOLTAS * Math.PI * 2, luz, prog(t, [ESTALO, ESTALO + 220]));
+        ctx.globalAlpha = 1;
+        if (ponta && luz < 1) for (var i = 0; i < 4; i++) novaFaisca(faiscas, ponta[0], ponta[1], 3);
+
+        if (t >= ESTALO && !estalou) {
+          estalou = true;
+          flash = 1;
+          var alvo = local(SOWILO[0], s);
+          var ax = cx + alvo[0], ay = cy + alvo[1];
+          raios.push({ pts: fazerRaio(ax + (Math.random() - .5) * W * .3, -10, ax, ay, H * .3), vida: 1, larg: 3.4 });
+          for (var j = 0; j < 70; j++) novaFaisca(faiscas, cx + (Math.random() - .5) * s * .4, cy + (Math.random() - .5) * s * .6, 5);
+        }
+      } else {
+        if (!solta) { solta = true; raiz.classList.add('intro-solta'); }
+        var q = suave(d);
+
+        /* a pedra grande se desfaz no lugar */
+        ctx.globalAlpha = Math.max(0, 1 - d * 2.6);
+        pedraGirando(cx, cy, S0 * (1 + d * .35), 0, 1, 1);
+        ctx.globalAlpha = 1;
+
+        /* a luz vai pra pedra do topo */
+        var rp = palco.getBoundingClientRect();
+        var lx = entre(cx, rp.left + rp.width / 2, q), ly = entre(cy, rp.top + rp.height / 2, q);
+        luzRuna(lx, ly, entre(S0, Math.min(rp.width, rp.height) * .92, q));
+
+        /* a cópia pequena faz uma curva, dá uma volta e pousa no menu */
+        var rm = marca.getBoundingClientRect();
+        var mx = rm.left + rm.width / 2, my = rm.top + rm.height / 2;
+        var kx = entre(cx, mx, .25), ky = my + (cy - my) * .1;
+        var bx = (1 - q) * (1 - q) * cx + 2 * (1 - q) * q * kx + q * q * mx;
+        var by = (1 - q) * (1 - q) * cy + 2 * (1 - q) * q * ky + q * q * my;
+        icone(bx, by, entre(S0 * .55, rm.width, q), Math.cos(q * Math.PI * 2), 1 - q);
+
+        if (d < .95) {
+          novaFaisca(faiscas, bx, by, 1.4);
+          novaFaisca(faiscas, lx, ly, 1.8);
+        }
+      }
+
+      for (var r = raios.length - 1; r >= 0; r--) {
+        desenharRaio(ctx, raios[r].pts, raios[r].vida, raios[r].larg);
+        raios[r].vida -= .04;
+        if (raios[r].vida <= 0) raios.splice(r, 1);
+      }
       moverFaiscas(ctx, faiscas);
-      if (ativo || faiscas.length) requestAnimationFrame(quadro); else rodando = false;
+      if (flash > 0) {
+        ctx.fillStyle = 'rgba(196,238,248,' + (flash * .5) + ')';
+        ctx.fillRect(0, 0, W, H);
+        flash -= .05;
+      }
+
+      if (t >= DIVIDE[1]) { acabar(); return; }
+      requestAnimationFrame(quadro);
     }
 
-    function mostrar(nome) {
-      segs = gerar(nome);
-      faiscas.length = 0;
-      inicio = performance.now();
-      if (!rodando) { rodando = true; requestAnimationFrame(quadro); }
+    /* fim normal ou pulado: o menu e o topo assumem do mesmo jeito */
+    function acabar() {
+      if (fim) return;
+      fim = true;
+      palcoTopo.chegou();
+      raiz.classList.remove('intro', 'intro-solta');
+      cv.remove();
+      pular.remove();
+      removeEventListener('keydown', acabar);
+      removeEventListener('wheel', acabar);
+      removeEventListener('touchmove', acabar);
+      removeEventListener('resize', medir);
     }
 
     medir();
-    mostrar('Dzk');
-    nomeEl.textContent = 'Dzk';
-
-    document.getElementById('form-runa').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var nome = document.getElementById('nome-runa').value.trim();
-      if (!nome) return;
-      mostrar(nome);
-      nomeEl.textContent = nome;
-      texto.innerHTML = 'Essa é a runa da <strong></strong>. Agora imagina o site.';
-      texto.querySelector('strong').textContent = nome;
-      cta.textContent = 'Quero o site da ' + (nome.length > 22 ? nome.slice(0, 22) + '…' : nome);
-      cta.href = linkZap('Oi! Fiz o teste da runa no site da Dzk. Meu negócio é *' + nome + '* e quero saber como ficaria o site dele.');
-      cta.classList.add('on');
-    });
-
-    var tm;
-    addEventListener('resize', function () {
-      clearTimeout(tm);
-      tm = setTimeout(function () { medir(); mostrar(nomeEl.textContent || 'Dzk'); }, 150);
-    });
+    addEventListener('resize', medir);
+    cv.addEventListener('pointerdown', acabar);
+    pular.addEventListener('click', acabar);
+    addEventListener('keydown', acabar);
+    addEventListener('wheel', acabar, { passive: true });
+    addEventListener('touchmove', acabar, { passive: true });
+    requestAnimationFrame(quadro);
   })();
 })();
 </script>
